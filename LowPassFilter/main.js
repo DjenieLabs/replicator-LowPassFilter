@@ -46,14 +46,19 @@ define(['HubLink', 'RIB', 'PropertiesPanel', 'Easy'], function(Hub, RIB, Ppanel,
 
     // Load Dependencies
     var libPath = this.basePath + 'lib/LPF/';
-    require([libPath+'lib/index.js'], function(lpf){
+    require([libPath+'lib/LPF.js'], function(lpf){
       that._LPF = lpf;
       console.log("LPF library loaded");
+      // If there were settings saved previously we can initiate the library
+      if(that.storedSettings && that.storedSettings.smoothValue){
+        that.lpf = new that._LPF(that.storedSettings.smoothValue);
+      }
     });
 
      // Load previously stored settings
     if(this.storedSettings && this.storedSettings.smoothValue){
       this.smoothValue = this.storedSettings.smoothValue;
+      this._settingsSet = true;
     }else{
       // Default filter value
       this.smoothValue = 0.5;
@@ -76,11 +81,16 @@ define(['HubLink', 'RIB', 'PropertiesPanel', 'Easy'], function(Hub, RIB, Ppanel,
    * actions from the hardware.
    */
   LowPassFilter.onExecute = function(event) {
-    if(event.action === 'Filter'){
+    if(this.lpf){
+      if(event.action === 'Filter'){
         // event.data should contain the current value to be corrected
-        var correction = this._ctrl.update(event.data);
-        
+        var result = this.lpf.next(event.data);
+        // Send my data to anyone listening
+        this.dispatchDataFeed({filtered: result});
+        // Send data to logic maker for processing
+        this.processData({filtered: result}); 
       }
+    }
   };
 
   /**
@@ -133,9 +143,10 @@ define(['HubLink', 'RIB', 'PropertiesPanel', 'Easy'], function(Hub, RIB, Ppanel,
   LowPassFilter.onSaveProperties = function(settings){
     console.log("Saving: ", settings);
     
-    this.smoothValue = settings.value;
+    this.smoothValue = settings.smoothValue;
     // Create/replace instance
-    this._LPF = new LPF(this.smoothValue);
+    this.lpf = new this._LPF(this.smoothValue);
+    this._settingsSet = true;
   };
 
   return LowPassFilter;
