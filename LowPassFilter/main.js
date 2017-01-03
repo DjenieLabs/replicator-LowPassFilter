@@ -1,6 +1,6 @@
 // ************************************************************************************************************
 // Written by Alexander Agudelo <alex.agudelo@asurantech.com>, 2016
-// Date: 30/Dec/2016
+// Date: 3/Jan/2017
 // Description: Low Pass Filter. 
 //
 // Original LPF Library: https://github.com/uhho/LPF
