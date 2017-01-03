@@ -45,8 +45,8 @@ define(['HubLink', 'RIB', 'PropertiesPanel', 'Easy'], function(Hub, RIB, Ppanel,
 
 
     // Load Dependencies
-    var libPath = this.basePath + 'lib/LPF/';
-    require([libPath+'lib/LPF.js'], function(lpf){
+    var libPath = this.basePath + 'lib/';
+    require([libPath+'LPF.js'], function(lpf){
       that._LPF = lpf;
       console.log("LPF library loaded");
       // If there were settings saved previously we can initiate the library
