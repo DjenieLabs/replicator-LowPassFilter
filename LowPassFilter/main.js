@@ -1,6 +1,6 @@
 define(['HubLink', 'RIB', 'PropertiesPanel', 'Easy'], function(Hub, RIB, Ppanel, easy) {
-  var actions = ["ACTION1", "ACTION2"];
-  var inputs = [];
+  var actions = ["Filter"];
+  var inputs = ["Filtered"];
   var _objects = {};
   var LowPassFilter = {
     settings:{
@@ -24,7 +24,7 @@ define(['HubLink', 'RIB', 'PropertiesPanel', 'Easy'], function(Hub, RIB, Ppanel,
    * By default it will show() the DataFeed, change it to true due to hide it. 
    */
   LowPassFilter.hideDataFeed = function() {
-    return false;
+    return true;
   };
 
   /**
@@ -35,7 +35,29 @@ define(['HubLink', 'RIB', 'PropertiesPanel', 'Easy'], function(Hub, RIB, Ppanel,
    * does not refer to this module, for that use 'LowPassFilter'
    */
   LowPassFilter.onLoad = function(){
+    this._settingsSet = false;
+    var that = this;
+    
+    // Load my properties template
+    this.loadTemplate('properties.html').then(function(template){
+      that.propTemplate = template;
+    });
 
+
+    // Load Dependencies
+    var libPath = this.basePath + 'lib/LPF/';
+    require([libPath+'lib/index.js'], function(lpf){
+      that._LPF = lpf;
+      console.log("LPF library loaded");
+    });
+
+     // Load previously stored settings
+    if(this.storedSettings && this.storedSettings.smoothValue){
+      this.smoothValue = this.storedSettings.smoothValue;
+    }else{
+      // Default filter value
+      this.smoothValue = 0.5;
+    }
   };
 
   /**
@@ -44,34 +66,22 @@ define(['HubLink', 'RIB', 'PropertiesPanel', 'Easy'], function(Hub, RIB, Ppanel,
    * canvas block
    */
   LowPassFilter.hasMissingProperties = function() {
-    // Define a logic you want to return true and open the properties window
-    return false;
+    return !this._settingsSet;
   };
 
-
-  /**
-   * Allows blocks controllers to change the content
-   * inside the Logic Maker container
-   */
-  LowPassFilter.lmContentOverride = function(){
-    // Use this to inject your custom HTML into the Logic Maker screen.
-    return "<div> LowPassFilter html </div>";
-  };
 
   /**
    * Parent is asking me to execute my logic.
    * This block only initiate processing with
    * actions from the hardware.
    */
-  LowPassFilter.onExecute = function() {
-
-
+  LowPassFilter.onExecute = function(event) {
+    if(event.action === 'Filter'){
+        // event.data should contain the current value to be corrected
+        var correction = this._ctrl.update(event.data);
+        
+      }
   };
-
-  // TODO: Move this to the block controller
-  function save() {
-
-  }
 
   /**
    * Triggered when the user clicks on a block.
@@ -82,28 +92,51 @@ define(['HubLink', 'RIB', 'PropertiesPanel', 'Easy'], function(Hub, RIB, Ppanel,
    * use LowPassFilter or this.controller
    */
   LowPassFilter.onClick = function(){
+    var that = this;
+    easy.clearCustomSettingsPanel();
 
+    // Compile template using current list
+    this.myPropertiesWindow = $(this.propTemplate({smoothValue: this.smoothValue}));
+    // Display elements
+    easy.displayCustomSettings(this.myPropertiesWindow, true);
   };
 
   /**
-   * Parent is send new data (using outputs).
+   * This method is called when the user hits the "Save"
+   * recipe button. Any object you return will be stored
+   * in the recipe and can be retrieved during startup (@onLoad) time.
    */
-  LowPassFilter.onNewData = function() {};
-
-  // Returns the current value of my inputs
-  // LowPassFilter.onRead = function(){};
-
-  // Optional event handlers
-  LowPassFilter.onMouseOver = function(){
-    // console.log("Mouse Over on ", myself.canvasIcon.id, evt);
+  LowPassFilter.onBeforeSave = function(){
+    return {smoothValue: this.smoothValue};
   };
 
   /**
-   * A copy has been dropped on the canvas.
-   * I need to keep a copy of the processor to be triggered when
-   * new data arrives.
+   * Intercepts the properties panel closing action.
+   * Return "false" to abort the action.
+   * NOTE: Settings Load/Saving will atomatically
+   * stop re-trying if the event propagates.
    */
-  LowPassFilter.onAddedtoCanvas = function(){};
+  LowPassFilter.onCancelProperties = function(){
+    console.log("Cancelling Properties");
+  };
+
+  /**
+   * Intercepts the properties panel save action.
+   * You must call the save method directly for the
+   * new values to be sent to hardware blocks.
+   * @param settings is an object with the values
+   * of the elements rendered in the interface.
+   * NOTE: For the settings object to contain anything
+   * you MUST have rendered the panel using standard
+   * ways (easy.showBaseSettings and easy.renderCustomSettings)
+   */
+  LowPassFilter.onSaveProperties = function(settings){
+    console.log("Saving: ", settings);
+    
+    this.smoothValue = settings.value;
+    // Create/replace instance
+    this._LPF = new LPF(this.smoothValue);
+  };
 
   return LowPassFilter;
 });

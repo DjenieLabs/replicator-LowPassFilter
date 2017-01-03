@@ -1,9 +1,17 @@
-<!-- Base parameters for sending email -->
+<!-- Base parameters to define the smooth value -->
 <template id="block-custom-properties">
   <p></p><p></p>
   <div class="ui inverted form">
-
-    <h4>{{ cookiecutter.block_shortname }}</h4>
+    
+    <h4>Smooth Factor</h4>
+    <div class="ui inverted divider"></div>
+    <div class="inline mini field">
+      <label>Smooth: </label>
+      <div data-source="smoothValue" data-value={{smoothValue}} class="ui inverted transparent icon input">
+        <input type="text" placeholder="0" value="{{smoothValue}}">
+        <i class="icon"></i>
+      </div>
+    </div>
 
   </div>
 </template>
