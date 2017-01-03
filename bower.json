@@ -1,0 +1,12 @@
+{
+  "name": "replicator-LowPassFilter",
+  "version": "0.1.0",
+  "description": "Smooths out fast changes (high frequency) of a given signal",
+  "homepage": "",
+  "authors": [
+    "Alexander Agudelo"
+  ],
+  "main": "main.js",
+  "keywords": [],
+  "license": "MIT"
+}
