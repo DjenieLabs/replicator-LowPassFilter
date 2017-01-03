@@ -1,3 +1,14 @@
+// ************************************************************************************************************
+// Written by Alexander Agudelo <alex.agudelo@asurantech.com>, 2016
+// Date: 30/Dec/2016
+// Description: Low Pass Filter. 
+//
+// Original LPF Library: https://github.com/uhho/LPF
+// ------
+// Copyright (C) Asuran Technologies - All Rights Reserved
+// Unauthorized copying of this file, via any medium is strictly prohibited
+// Proprietary and confidential.
+// ************************************************************************************************************
 define(['HubLink', 'RIB', 'PropertiesPanel', 'Easy'], function(Hub, RIB, Ppanel, easy) {
   var actions = ["Filter"];
   var inputs = ["Filtered"];
